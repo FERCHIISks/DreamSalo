@@ -4,9 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Samsung Remote</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Samsung Remote</h1>
-    <p>This is an HTML representation of a Samsung Remote Control.</p>
+    <header>
+        <h1>Samsung Remote Control</h1>
+    </header>
+    <main>
+        <div id="remote">
+            <button class="btn" id="power">Power</button>
+            <button class="btn" id="volume-up">Volume +</button>
+            <button class="btn" id="volume-down">Volume -</button>
+            <button class="btn" id="channel-up">Channel +</button>
+            <button class="btn" id="channel-down">Channel -</button>
+        </div>
+    </main>
+    <script src="scripts.js"></script>
 </body>
 </html>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+#remote {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn {
+    background-color: #008CBA;
+    color: white;
+    padding: 15px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #005f6b;
+}
+</style>
+
+<script>
+document.getElementById('power').addEventListener('click', function() {
+    alert('Power button pressed');
+});
+document.getElementById('volume-up').addEventListener('click', function() {
+    alert('Volume increased');
+});
+document.getElementById('volume-down').addEventListener('click', function() {
+    alert('Volume decreased');
+});
+document.getElementById('channel-up').addEventListener('click', function() {
+    alert('Channel increased');
+});
+document.getElementById('channel-down').addEventListener('click', function() {
+    alert('Channel decreased');
+});
+</script>
