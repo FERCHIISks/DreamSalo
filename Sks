@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Samsung Remote</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;min-height:100vh;display:flex;flex-direction:column;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#c8c8e8;padding:16px 12px 40px;background-image:radial-gradient(ellipse 70% 35% at 50% 0%,#0d1f3c 0%,transparent 65%)}
+#setupScreen{width:100%;max-width:420px}
+.logo{font-size:14px;font-weight:700;letter-spacing:5px;color:#00d4ff;text-align:center;margin-bottom:4px;text-shadow:0 0 16px #00d4ff66}
+.sub{text-align:center;font-size:11px;color:#5a5a7a;letter-spacing:2px;margin-bottom:24px}
+.card{background:#1a1a24;border:1px solid #2a2a3e;border-radius:20px;padding:24px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px #000b}
+.lbl{font-size:10px;letter-spacing:2px;color:#5a5a7a;text-transform:uppercase;margin-bottom:6px}
+.inp{width:100%;background:#20202e;border:1px solid #2a2a3e;border-radius:12px;padding:14px 16px;color:#f0f0ff;font-size:14px;outline:none;-webkit-appearance:none;transition:border-color .2s}
+.inp:focus{border-color:#1a78ff}
+.inp::placeholder{color:#5a5a7a}
+.btn-main{width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#1a78ff,#0050cc);color:white;font-weight:700;font-size:14px;letter-spacing:2px;box-shadow:0 4px 24px #1a78ff44;display:flex;align-items:center;justify-content:center;gap:10px;-webkit-appearance:none}
+.btn-main:active{opacity:.85}
+.btn-main:disabled{opacity:.5}
+.err{background:#2a0a10;border:1px solid #ff3b5c55;border-radius:10px;padding:12px 16px;font-size:12px;color:#ff3b5c;display:none;line-height:1.6;white-space:pre-wrap}
+.err.show{display:block}
+#deviceScreen{width:100%;max-width:420px;display:none}
+.sec-title{font-size:10px;letter-spacing:3px;color:#5a5a7a;text-align:center;margin-bottom:12px;text-transform:uppercase}
+.dev-card{background:#1a1a24;border:1px solid #2a2a3e;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.dev-item{background:#20202e;border:1px solid #2a2a3e;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dev-item:active{background:#141428;border-color:#1a78ff}
+.dev-name{font-size:14px;font-weight:600;color:#f0f0ff}
+.dev-id{font-size:10px;color:#5a5a7a;margin-top:2px}
+#remoteScreen{width:100%;max-width:420px;display:none}
+.hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.hdr-logo{font-size:13px;font-weight:700;letter-spacing:4px;color:#00d4ff;text-shadow:0 0 10px #00d4ff55}
+.hdr-sep{width:1px;height:20px;background:#2a2a3e}
+.hdr-name{flex:1;font-size:11px;letter-spacing:1px;color:#5a5a7a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-chg{font-size:11px;color:#c8c8e8;background:none;border:1px solid #2a2a3e;border-radius:8px;padding:4px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.sbar{background:#1a1a24;border:1px solid #2a2a3e;border-radius:14px;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sdot{width:8px;height:8px;border-radius:50%;background:#00e57a;box-shadow:0 0 8px #00e57a;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.stext{font-size:12px;margin-left:10px}
+.sinfo{font-size:11px;color:#5a5a7a}
+.log-bar{background:#20202e;border:1px solid #2a2a3e;border-radius:10px;padding:8px 12px;font-size:10px;color:#5a5a7a;max-height:40px;overflow-y:auto;font-family:monospace;line-height:1.7;margin-bottom:12px}
+.ok{color:#00e57a}.er{color:#ff3b5c}.inf{color:#00d4ff}
+.vols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.vol-card{background:#1a1a24;border:1px solid #2a2a3e;border-radius:14px;padding:12px 14px}
+.vol-lbl{font-size:10px;letter-spacing:2px;color:#5a5a7a;text-transform:uppercase;margin-bottom:6px}
+.vol-val{font-size:22px;font-weight:700;color:#f0f0ff;margin-bottom:6px}
+.bar{width:100%;height:4px;background:#2a2a3e;border-radius:2px}
+.bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#1a78ff,#00d4ff);transition:width .3s}
+.remote{background:#1a1a24;border:1px solid #2a2a3e;border-radius:26px;padding:22px 18px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px #000b}
+.slbl{font-size:9px;letter-spacing:3px;color:#5a5a7a;text-transform:uppercase;text-align:center;margin-bottom:-4px}
+.row{display:flex;align-items:center;justify-content:center;gap:10px}
+.rowsb{display:flex;align-items:center;justify-content:space-between;padding:0 4px}
+.col{display:flex;flex-direction:column;gap:8px;align-items:center}
+.div{height:1px;background:linear-gradient(90deg,transparent,#2a2a3e,transparent)}
+.b{display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;outline:none;-webkit-tap-highlight-color:transparent;user-select:none;position:relative;font-family:inherit}
+.b:active{opacity:.7;transform:scale(.9)}
+.b.busy{opacity:.4;pointer-events:none}
+.brnd{width:52px;height:52px;border-radius:50%;background:#20202e;border:1px solid #2a2a3e;color:#c8c8e8;font-size:12px;font-weight:600}
+.bsm{width:42px;height:42px;border-radius:50%;background:#20202e;border:1px solid #2a2a3e;color:#c8c8e8;font-size:16px}
+.bpwr{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#2a0010,#1a000a);border:1px solid #ff3b5c44;color:#ff3b5c;font-size:20px}
+.bpl{padding:10px 16px;border-radius:22px;background:#20202e;border:1px solid #2a2a3e;color:#c8c8e8;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.bacc{background:linear-gradient(135deg,#0f3a80,#0d2a60);border:1px solid #1a78ff;color:#8bbfff}
+.dpad{position:relative;width:160px;height:160px;margin:0 auto}
+.dp{position:absolute;width:50px;height:50px;background:#20202e;border:1px solid #2a2a3e;color:#c8c8e8;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;outline:none;-webkit-tap-highlight-color:transparent;user-select:none}
+.dp:active{background:#141428;transform:scale(.88)}
+.dp-u{top:0;left:50%;transform:translateX(-50%);border-radius:14px 14px 4px 4px}
+.dp-u:active{transform:translateX(-50%) scale(.88)}
+.dp-d{bottom:0;left:50%;transform:translateX(-50%);border-radius:4px 4px 14px 14px}
+.dp-d:active{transform:translateX(-50%) scale(.88)}
+.dp-l{left:0;top:50%;transform:translateY(-50%);border-radius:14px 4px 4px 14px}
+.dp-l:active{transform:translateY(-50%) scale(.88)}
+.dp-r{right:0;top:50%;transform:translateY(-50%);border-radius:4px 14px 14px 4px}
+.dp-r:active{transform:translateY(-50%) scale(.88)}
+.dp-ok{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1a2a50,#0d1a38);border:none;color:#8bbfff;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px #1a78ff44;z-index:2;outline:none;-webkit-tap-highlight-color:transparent}
+.dp-ok:active{transform:translate(-50%,-50%) scale(.9)}
+.npad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bnum{aspect-ratio:1;border-radius:12px;background:#20202e;border:1px solid #2a2a3e;color:#c8c8e8;font-size:18px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;outline:none;-webkit-tap-highlight-color:transparent;padding:12px}
+.bnum:active{background:#141428;transform:scale(.9)}
+.crow{display:flex;gap:8px}
+.bcol{flex:1;height:36px;border-radius:8px;border:none;cursor:pointer;font-size:11px;font-weight:700;color:rgba(255,255,255,.85);-webkit-tap-highlight-color:transparent}
+.bcol:active{transform:scale(.9)}
+.cred{background:#c0203a}.cgreen{background:#0a8a50}.cyellow{background:#b08000}.cblue{background:#1050c0}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-70px);background:#1a1a24;border:1px solid #2a2a3e;border-radius:28px;padding:10px 20px;font-size:13px;font-weight:600;color:#00d4ff;box-shadow:0 8px 28px #000b;transition:transform .3s cubic-bezier(.34,1.4,.64,1),opacity .3s;opacity:0;z-index:999;white-space:nowrap;max-width:90vw}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:sp .7s linear infinite;display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- SETUP -->
+<div id="setupScreen">
+  <div class="logo">SAMSUNG</div>
+  <div class="sub">Smart Remote · SmartThings</div>
+  <div class="card">
+    <div>
+      <div class="lbl">Token SmartThings</div>
+      <input class="inp" id="TK" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="err" id="EM"></div>
+    <button class="btn-main" id="CB" onclick="connect()">
+      <span id="CT">Conectar y buscar TV</span>
+      <div class="spin" id="CS"></div>
+    </button>
+  </div>
+</div>
+
+<!-- DEVICES -->
+<div id="deviceScreen">
+  <div class="sec-title">Selecciona tu Samsung TV</div>
+  <div class="dev-card" id="DL"></div>
+</div>
+
+<!-- REMOTE -->
+<div id="remoteScreen">
+  <div class="hdr">
+    <span class="hdr-logo">SAMSUNG</span>
+    <div class="hdr-sep"></div>
+    <span class="hdr-name" id="TN">TV</span>
+    <button class="btn-chg" onclick="goBack()">↩ Cambiar</button>
+  </div>
+  <div class="sbar">
+    <div style="display:flex;align-items:center">
+      <div class="sdot" id="SD"></div>
+      <span class="stext" id="ST">Conectando…</span>
+    </div>
+    <span class="sinfo" id="SI">—</span>
+  </div>
+  <div class="log-bar" id="LB"><span class="inf">▸ Listo</span></div>
+  <div class="vols">
+    <div class="vol-card"><div class="vol-lbl">Volumen</div><div class="vol-val" id="VV">—</div><div class="bar"><div class="bar-fill" id="VF" style="width:0%"></div></div></div>
+    <div class="vol-card"><div class="vol-lbl">Canal</div><div class="vol-val" id="CV">—</div><div class="bar"><div class="bar-fill" id="CF" style="width:0%;background:linear-gradient(90deg,#8b5cf6,#00d4ff)"></div></div></div>
+  </div>
+  <div class="remote">
+    <div class="rowsb">
+      <button class="b brnd" onclick="C('audioMute','mute',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button>
+      <button class="b bpwr" onclick="togglePwr(this)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button>
+      <button class="b brnd" onclick="K('KEY_SOURCE',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M17 2l-5 5-5-5"/></svg></button>
+    </div>
+    <div class="div"></div><div class="slbl">Navegación</div>
+    <div class="dpad">
+      <button class="dp dp-u" onclick="K('KEY_UP',this)">↑</button>
+      <button class="dp dp-l" onclick="K('KEY_LEFT',this)">←</button>
+      <button class="dp-ok"   onclick="K('KEY_ENTER',this)">OK</button>
+      <button class="dp dp-r" onclick="K('KEY_RIGHT',this)">→</button>
+      <button class="dp dp-d" onclick="K('KEY_DOWN',this)">↓</button>
+    </div>
+    <div class="row">
+      <button class="b bpl" onclick="K('KEY_RETURN',this)">← Atrás</button>
+      <button class="b brnd bacc" onclick="K('KEY_HOME',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+      <button class="b bpl" onclick="K('KEY_MENU',this)">≡ Menú</button>
+    </div>
+    <div class="div"></div><div class="slbl">Volumen · Canal</div>
+    <div class="rowsb">
+      <div class="col">
+        <button class="b brnd" onclick="setVol(5,this)">VOL+</button>
+        <button class="b brnd" onclick="setVol(-5,this)">VOL−</button>
+      </div>
+      <div class="row">
+        <button class="b bpl" onclick="K('KEY_PRECH',this)">⏮ Prev</button>
+        <button class="b brnd bacc" onclick="K('KEY_GUIDE',this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg></button>
+      </div>
+      <div class="col">
+        <button class="b brnd" onclick="K('KEY_CHUP',this)">CH+</button>
+        <button class="b brnd" onclick="K('KEY_CHDOWN',this)">CH−</button>
+      </div>
+    </div>
+    <div class="div"></div><div class="slbl">Reproducción</div>
+    <div class="row">
+      <button class="b bsm" onclick="K('KEY_REWIND',this)">⏮</button>
+      <button class="b bsm" onclick="K('KEY_REWIND',this)">⏪</button>
+      <button class="b brnd bacc" id="PB" onclick="togglePlay(this)">▶</button>
+      <button class="b bsm" onclick="K('KEY_FF',this)">⏩</button>
+      <button class="b bsm" onclick="K('KEY_FF',this)">⏭</button>
+    </div>
+    <div class="div"></div><div class="slbl">Apps</div>
+    <div class="row">
+      <button class="b bpl" onclick="A('11101200001',this)">Netflix</button>
+      <button class="b bpl bacc" onclick="A('111299001912',this)">YouTube</button>
+      <button class="b bpl" onclick="A('11101000316',this)">Prime</button>
+    </div>
+    <div class="row">
+      <button class="b bpl" onclick="A('3201512006785',this)">Disney+</button>
+      <button class="b bpl" onclick="A('3202103023585',this)">Spotify</button>
+      <button class="b bpl" onclick="K('KEY_SMART',this)">SmartHub</button>
+    </div>
+    <div class="div"></div><div class="slbl">Colores</div>
+    <div class="crow">
+      <button class="bcol cred"    onclick="K('KEY_RED',null)">A</button>
+      <button class="bcol cgreen"  onclick="K('KEY_GREEN',null)">B</button>
+      <button class="bcol cyellow" onclick="K('KEY_YELLOW',null)">C</button>
+      <button class="bcol cblue"   onclick="K('KEY_BLUE',null)">D</button>
+    </div>
+    <div class="div"></div><div class="slbl">Numérico</div>
+    <div class="npad">
+      <button class="b bnum" onclick="N('1',this)">1</button>
+      <button class="b bnum" onclick="N('2',this)">2</button>
+      <button class="b bnum" onclick="N('3',this)">3</button>
+      <button class="b bnum" onclick="N('4',this)">4</button>
+      <button class="b bnum" onclick="N('5',this)">5</button>
+      <button class="b bnum" onclick="N('6',this)">6</button>
+      <button class="b bnum" onclick="N('7',this)">7</button>
+      <button class="b bnum" onclick="N('8',this)">8</button>
+      <button class="b bnum" onclick="N('9',this)">9</button>
+      <button class="b bnum" onclick="K('KEY_PRECH',this)" style="font-size:11px">PREV</button>
+      <button class="b bnum" onclick="N('0',this)">0</button>
+      <button class="b bnum" onclick="K('KEY_DEL',this)" style="font-size:20px">⌫</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://api.smartthings.com/v1';
+let TK='', DID='', vol=0, pwr=true, play=false, nb='', nt=null, pt=null;
+
+const $=id=>document.getElementById(id);
+function show(id){$(id).style.display='block'}
+function hide(id){$(id).style.display='none'}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._);t._=setTimeout(()=>t.classList.remove('show'),2200)}
+function log(m,c='inf'){const e=$('LB');e.innerHTML+=`<br><span class="${c}">▸ ${m}</span>`;e.scrollTop=e.scrollHeight}
+
+async function api(path,method='GET',body=null){
+  const r=await fetch(API+path,{method,headers:{'Authorization':'Bearer '+TK,'Content-Type':'application/json'},body:body?JSON.stringify(body):null});
+  const t=await r.text();
+  if(!r.ok)throw new Error(r.status+': '+t.slice(0,80));
+  return t?JSON.parse(t):{};
+}
+
+async function connect(){
+  TK=$('TK').value.trim();
+  if(!TK){$('EM').textContent='Ingresa tu token.';$('EM').classList.add('show');return}
+  $('EM').classList.remove('show');
+  $('CB').disabled=true;$('CT').textContent='Buscando…';$('CS').style.display='block';
+  try{
+    let items=[];
+    try{const d=await api('/devices?capability=samsungvd.remoteControlV2');items=d.items||[];}catch(e){}
+    if(!items.length){
+      const d=await api('/devices');
+      items=(d.items||[]).filter(v=>(v.label||v.name||'').toLowerCase().match(/tv|samsung/));
+      if(!items.length){const d2=await api('/devices');items=d2.items||[];}
+    }
+    if(!items.length){$('EM').textContent='No se encontraron TVs en tu cuenta.';$('EM').classList.add('show');}
+    else renderDevices(items);
+  }catch(e){
+    $('EM').textContent='Error: '+e.message+'\n\nRevisa tu token y tu conexión a internet.';
+    $('EM').classList.add('show');
+  }
+  $('CB').disabled=false;$('CT').textContent='Conectar';$('CS').style.display='none';
+}
+
+function renderDevices(list){
+  hide('setupScreen');
+  const el=$('DL');el.innerHTML='';
+  list.forEach(d=>{
+    const div=document.createElement('div');div.className='dev-item';
+    div.innerHTML=`<div style="font-size:26px">📺</div><div><div class="dev-name">${d.label||d.name||'Dispositivo'}</div><div class="dev-id">${(d.deviceId||'').slice(0,22)}…</div></div>`;
+    div.addEventListener('click',()=>selectDevice(d));
+    el.appendChild(div);
+  });
+  show('deviceScreen');
+}
+
+async function selectDevice(d){
+  DID=d.deviceId;$('TN').textContent=d.label||d.name;
+  hide('deviceScreen');show('remoteScreen');
+  await refresh();
+  pt=setInterval(refresh,15000);
+}
+
+async function refresh(){
+  try{
+    const d=await api('/devices/'+DID+'/status');
+    const m=(d.components||{}).main||{};
+    const sw=m.switch?.switch?.value||'?';
+    const v=m.audioVolume?.volume?.value;
+    const inp=m['samsungvd.mediaInputSource']?.inputSource?.value||m.mediaInputSource?.inputSource?.value||'';
+    pwr=(sw==='on');
+    $('SD').style.cssText='background:'+(pwr?'#00e57a':'#ff3b5c')+';box-shadow:0 0 8px '+(pwr?'#00e57a':'#ff3b5c');
+    $('ST').textContent=pwr?'TV Encendida':'TV Apagada';
+    $('SI').textContent=inp||(pwr?'En línea':'—');
+    if(v!=null){vol=v;$('VV').textContent=v;$('VF').style.width=v+'%'}
+    log('Vol:'+v+' '+sw,'ok');
+  }catch(e){log('Error: '+e.message.slice(0,40),'er')}
+}
+
+async function C(cap,cmd,btn,args=[]){
+  if(btn)btn.classList.add('busy');
+  try{await api('/devices/'+DID+'/commands','POST',{commands:[{component:'main',capability:cap,command:cmd,arguments:args}]});toast('▸ '+cmd);log(cmd,'ok');setTimeout(refresh,1200);}
+  catch(e){toast('⚠ Error');log('Err:'+e.message.slice(0,40),'er')}
+  if(btn)btn.classList.remove('busy');
+}
+
+async function K(k,btn){
+  if(btn)btn.classList.add('busy');
+  try{await api('/devices/'+DID+'/commands','POST',{commands:[{component:'main',capability:'samsungvd.remoteControlV2',command:'sendKey',arguments:[k]}]});toast('▸ '+k);log(k,'ok');}
+  catch(e){
+    if(k==='KEY_PLAY')await C('mediaPlayback','play',null);
+    else if(k==='KEY_PAUSE')await C('mediaPlayback','pause',null);
+    else{toast('⚠ '+k.replace('KEY_',''));log('Err '+k,'er')}
+  }
+  if(btn)btn.classList.remove('busy');
+}
+
+async function setVol(d,btn){
+  const nv=Math.max(0,Math.min(100,vol+d));
+  if(btn)btn.classList.add('busy');
+  try{await api('/devices/'+DID+'/commands','POST',{commands:[{component:'main',capability:'audioVolume',command:'setVolume',arguments:[nv]}]});vol=nv;$('VV').textContent=nv;$('VF').style.width=nv+'%';toast((d>0?'🔊':'🔉')+' Vol:'+nv);}
+  catch(e){toast('⚠ Error vol')}
+  if(btn)btn.classList.remove('busy');
+}
+
+async function A(appId,btn){
+  if(btn)btn.classList.add('busy');
+  try{await api('/devices/'+DID+'/commands','POST',{commands:[{component:'main',capability:'samsungvd.mediaApp',command:'launchApp',arguments:[{appId}]}]});toast('▸ Abriendo…');}
+  catch(e){toast('⚠ Error app')}
+  if(btn)btn.classList.remove('busy');
+}
+
+function togglePwr(btn){C('switch',pwr?'off':'on',btn)}
+function togglePlay(btn){play=!play;btn.textContent=play?'⏸':'▶';K(play?'KEY_PLAY':'KEY_PAUSE',null)}
+
+function N(n,btn){
+  clearTimeout(nt);nb+=n;toast('📺 Canal: '+nb);
+  nt=setTimeout(async()=>{const ch=nb;nb='';for(const d of ch){await K('KEY_'+d,null);await new Promise(r=>setTimeout(r,180))}log('CH→'+ch,'ok')},1600);
+}
+
+function goBack(){clearInterval(pt);hide('remoteScreen');show('deviceScreen')}
+
+// Enter en input
+document.addEventListener('DOMContentLoaded',()=>{
+  $('TK').addEventListener('keydown',e=>{if(e.key==='Enter')connect()});
+});
+</script>
+</body>
+</html>
